@@ -43,7 +43,7 @@ while True:
     while True:
         username = input('Enter your Username: ').strip()
         
-        if username.strip() == '':
+        if username == '':
             print('Field Should not be left blank!')
             continue
         elif len(username) < 5:
