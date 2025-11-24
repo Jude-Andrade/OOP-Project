@@ -1,3 +1,12 @@
+qr_attendance_system/
+├── database.py
+├── qr_generator.py
+├── scanner.py
+├── admin_panel.py
+├── main.py
+├── logs/
+└── qr_codes/
+
 # Project Folder: qr_attendance_system/
 
 $ database.py
