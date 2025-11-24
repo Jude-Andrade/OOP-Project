@@ -21,3 +21,4 @@ def init_db():
     create_table_if_not_exists()
 
 
+

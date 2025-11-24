@@ -32,7 +32,7 @@ create_account = Account_Creator()
 
 while True:
     while True:
-        userId = input('Enter your User Identification: ')
+        userId = input('Enter your User Identification: ').strip()
         
         if userId == '':
             print('Field Should not be left blank!')
@@ -41,9 +41,9 @@ while True:
             break
     
     while True:
-        username = input('Enter your Username: ')
+        username = input('Enter your Username: ').strip()
         
-        if username == '':
+        if username.strip() == '':
             print('Field Should not be left blank!')
             continue
         elif len(username) < 5:
@@ -53,7 +53,7 @@ while True:
             break
         
     while True:
-        password = input('Enter your Password: ')
+        password = input('Enter your Password: ').strip()
         
         if password == '':
             print('Field Should not be left blank!')
