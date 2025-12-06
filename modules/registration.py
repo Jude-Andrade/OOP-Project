@@ -46,6 +46,7 @@ class RegistrationWindow:
         self.name_var = tk.StringVar()
         self.id_var = tk.StringVar()
         self.department_var = tk.StringVar()
+        self.contact_var = tk.StringVar()
         self.user_type_var = tk.StringVar(value="Student")
         
         self.generated_qr_path = None
@@ -175,10 +176,30 @@ class RegistrationWindow:
             width=40
         )
         self.dept_entry.grid(row=3, column=1, sticky=tk.W, pady=(25, 25))
+
+        # Contact Number Field
+        self.contact_label = tk.Label(
+            inner_form,
+            text="Contact Number:",
+            font=("Arial", 14, "bold"),
+            bg="#ecf0f1",
+            width=15,
+            anchor=tk.W,
+            height=1
+        )
+        self.contact_label.grid(row=4, column=0, sticky=tk.W + tk.E, pady=(25, 8), padx=(0, 20))
+
+        self.contact_entry = tk.Entry(
+            inner_form,
+            textvariable=self.contact_var,
+            font=("Arial", 14),
+            width=40
+        )
+        self.contact_entry.grid(row=4, column=1, sticky=tk.W, pady=(25, 25))
         
         # Buttons
         button_frame = tk.Frame(inner_form, bg="#ecf0f1")
-        button_frame.grid(row=4, column=0, columnspan=2, pady=40)
+        button_frame.grid(row=5, column=0, columnspan=2, pady=40)
         
         register_btn = tk.Button(
             button_frame,
@@ -275,34 +296,61 @@ class RegistrationWindow:
                 self.id_var.set("")
             if self.department_var.get() == "Guest":
                 self.department_var.set("")
+
+        # Contact number should always be visible for all user types
+        try:
+            self.contact_label.grid()
+            self.contact_entry.grid()
+        except Exception:
+            pass
     
     def validate_input(self):
         """Validate user input before registration"""
         name = self.name_var.get().strip()
         id_number = self.id_var.get().strip()
         department = self.department_var.get().strip()
+        contact_number = self.contact_var.get().strip()
         user_type = self.user_type_var.get()
         
         if not name:
-            messagebox.showerror("Validation Error", "Please enter a name.")
+            messagebox.showerror("Validation Error", "Please enter a name.", parent=self.window)
             return False
         
         if user_type != "Guest":
             if not id_number:
-                messagebox.showerror("Validation Error", "Please enter an ID number.")
+                messagebox.showerror("Validation Error", "Please enter an ID number.", parent=self.window)
                 return False
             
             if not department:
-                messagebox.showerror("Validation Error", "Please enter a department.")
+                messagebox.showerror("Validation Error", "Please enter a department.", parent=self.window)
                 return False
             
             # Check if ID already exists (except for guests)
             if self.db_manager.check_id_exists(id_number):
-                messagebox.showerror(
+                # Notify the user but keep the registration window open.
+                # Attach the dialog to this window so focus returns here.
+                messagebox.showwarning(
                     "Duplicate ID",
-                    f"ID number '{id_number}' is already registered.\nPlease use a different ID."
+                    f"ID number '{id_number}' is already registered.\nPlease use a different ID.",
+                    parent=self.window
                 )
+                # Return focus to the ID entry so the user can correct it.
+                try:
+                    self.id_entry.focus_set()
+                    self.id_entry.selection_range(0, tk.END)
+                except Exception:
+                    pass
                 return False
+
+        # Contact number is required for all user types
+        if not contact_number:
+            messagebox.showerror("Validation Error", "Please enter a contact number.", parent=self.window)
+            try:
+                self.contact_entry.focus_set()
+                self.contact_entry.selection_range(0, tk.END)
+            except Exception:
+                pass
+            return False
         
         return True
     
@@ -315,6 +363,7 @@ class RegistrationWindow:
         name = self.name_var.get().strip()
         id_number = self.id_var.get().strip()
         department = self.department_var.get().strip()
+        contact_number = self.contact_var.get().strip()
         user_type = self.user_type_var.get()
         
         # Generate QR code first
@@ -335,6 +384,7 @@ class RegistrationWindow:
             id_number=id_number,
             department=department,
             user_type=user_type,
+            contact_number=contact_number,
             qr_path=qr_path
         )
         
@@ -354,6 +404,7 @@ class RegistrationWindow:
                 f"Name: {name}\n"
                 f"ID: {id_number}\n"
                 f"Department: {department}\n"
+                f"Contact: {contact_number}\n"
                 f"Type: {user_type}\n\n"
                 f"QR Code has been generated and displayed.",
                 parent=self.window
@@ -414,6 +465,7 @@ class RegistrationWindow:
         self.id_var.set("")
         self.department_var.set("")
         self.user_type_var.set("Student")
+        self.contact_var.set("")
         self.generated_qr_path = None
         self.save_qr_btn.config(state=tk.DISABLED)
         

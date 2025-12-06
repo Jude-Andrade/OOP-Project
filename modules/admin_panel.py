@@ -7,6 +7,8 @@ for viewing, searching, filtering, and exporting log records.
 
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+import sqlite3
+import ctypes
 from datetime import datetime
 from tkcalendar import DateEntry
 
@@ -28,20 +30,44 @@ class AdminLoginWindow:
         # Create new window
         self.window = tk.Toplevel(parent)
         self.window.title("Admin Login - EVSU-OC ALIBLOG")
-        self.window.geometry("500x400")
+        # make the login window larger to match desired UI and center it
+        self.window.geometry("720x520")
+        # prevent resizing to keep layout stable
+        self.window.resizable(False, False)
         self.window.configure(bg="#34495e")
         
         # Center window
-        self.center_window(500, 400)
+        self.center_window(720, 520)
         
         # Make window overlay everything
         self.window.attributes('-topmost', True)
         self.window.lift()
         self.window.focus_set()
+        # Try to remove the minimize button on Windows (non-fatal if it fails)
+        try:
+            # Remove minimize and maximize buttons but keep close (WS_SYSMENU)
+            GWL_STYLE = -16
+            WS_MINIMIZEBOX = 0x00020000
+            WS_MAXIMIZEBOX = 0x00010000
+            hwnd = self.window.winfo_id()
+            style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_STYLE)
+            style = style & ~WS_MINIMIZEBOX & ~WS_MAXIMIZEBOX
+            ctypes.windll.user32.SetWindowLongW(hwnd, GWL_STYLE, style)
+            # Apply the change so the titlebar updates
+            SWP_NOSIZE = 0x1
+            SWP_NOMOVE = 0x2
+            SWP_NOZORDER = 0x4
+            SWP_FRAMECHANGED = 0x20
+            flags = SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED
+            ctypes.windll.user32.SetWindowPos(hwnd, 0, 0, 0, 0, 0, flags)
+        except Exception:
+            pass
         
         # Variables
         self.username_var = tk.StringVar()
         self.password_var = tk.StringVar()
+        # Guard to avoid repeated error dialogs stacking
+        self._login_error_shown = False
         
         self.create_widgets()
     
@@ -83,14 +109,16 @@ class AdminLoginWindow:
         )
         username_label.grid(row=0, column=0, sticky=tk.W, pady=10, padx=10)
         
-        username_entry = tk.Entry(
+        self.username_entry = tk.Entry(
             form_frame,
             textvariable=self.username_var,
             font=("Arial", 14),
             width=25
         )
-        username_entry.grid(row=0, column=1, pady=10, padx=10)
-        username_entry.focus_set()
+        self.username_entry.grid(row=0, column=1, pady=10, padx=10)
+        self.username_entry.focus_set()
+        # Reset error-flag when user types
+        self.username_entry.bind('<Key>', lambda e: self.reset_login_error_flag())
         
         # Password
         password_label = tk.Label(
@@ -102,17 +130,19 @@ class AdminLoginWindow:
         )
         password_label.grid(row=1, column=0, sticky=tk.W, pady=10, padx=10)
         
-        password_entry = tk.Entry(
+        self.password_entry = tk.Entry(
             form_frame,
             textvariable=self.password_var,
             font=("Arial", 14),
             width=25,
             show="●"
         )
-        password_entry.grid(row=1, column=1, pady=10, padx=10)
+        self.password_entry.grid(row=1, column=1, pady=10, padx=10)
+        # Reset error-flag when user types
+        self.password_entry.bind('<Key>', lambda e: self.reset_login_error_flag())
         
         # Bind Enter key
-        password_entry.bind('<Return>', lambda e: self.login())
+        self.password_entry.bind('<Return>', lambda e: self.login())
         
         # Login button
         login_btn = tk.Button(
@@ -130,15 +160,22 @@ class AdminLoginWindow:
         )
         login_btn.grid(row=2, column=0, columnspan=2, pady=30)
         
-        # Info label
-        info_label = tk.Label(
-            self.window,
-            text="Default credentials: admin / admin123",
-            font=("Arial", 10, "italic"),
-            bg="#34495e",
-            fg="#95a5a6"
+        # Create Admin button
+        create_admin_btn = tk.Button(
+            form_frame,
+            text="➕ Create Admin",
+            font=("Arial", 11, "bold"),
+            bg="#3498db",
+            fg="white",
+            activebackground="#2980b9",
+            activeforeground="white",
+            width=20,
+            height=1,
+            cursor="hand2",
+            command=lambda: [self.window.destroy(), CreateAdminWindow(self.parent, self.db_manager)]
         )
-        info_label.pack(side=tk.BOTTOM, pady=10)
+        create_admin_btn.grid(row=3, column=0, columnspan=2, pady=(0,10))
+        
     
     def login(self):
         """Verify credentials and open admin dashboard"""
@@ -146,15 +183,41 @@ class AdminLoginWindow:
         password = self.password_var.get().strip()
         
         if not username or not password:
-            messagebox.showerror("Login Error", "Please enter both username and password.")
+            # Prevent re-entrant stacking while the modal dialog is open by
+            # setting the guard during the showerror call, then reset it
+            # once the user dismisses the dialog so it can reappear again.
+            if not self._login_error_shown:
+                try:
+                    self._login_error_shown = True
+                    messagebox.showerror("Login Error", "Please enter both username and password.", parent=self.window)
+                except Exception:
+                    # Fallback if attaching parent fails
+                    self._login_error_shown = True
+                    messagebox.showerror("Login Error", "Please enter both username and password.")
+                finally:
+                    self._login_error_shown = False
             return
         
         if self.db_manager.verify_admin(username, password):
             self.window.destroy()
             AdminDashboard(self.parent, self.db_manager)
         else:
-            messagebox.showerror("Login Failed", "Invalid username or password.")
+            # Prevent stacking while the error dialog is visible; allow it
+            # to reappear after the user dismisses it (without forcing typing).
+            if not self._login_error_shown:
+                try:
+                    self._login_error_shown = True
+                    messagebox.showerror("Login Failed", "Invalid username or password.", parent=self.window)
+                except Exception:
+                    self._login_error_shown = True
+                    messagebox.showerror("Login Failed", "Invalid username or password.")
+                finally:
+                    self._login_error_shown = False
             self.password_var.set("")
+
+    def reset_login_error_flag(self):
+        """Reset the guard so error dialogs can show again after user input."""
+        self._login_error_shown = False
 
 
 class AdminDashboard:
@@ -174,11 +237,21 @@ class AdminDashboard:
         # Create new window
         self.window = tk.Toplevel(parent)
         self.window.title("Admin Dashboard - EVSU-OC ALIBLOG")
-        self.window.geometry("1400x800")
         self.window.configure(bg="#ecf0f1")
-        
-        # Center window
-        self.center_window(1400, 800)
+
+        # Try to maximize the dashboard to fill the screen. Use 'zoomed'
+        # where supported (Windows), otherwise fall back to setting the
+        # geometry to the screen size.
+        try:
+            self.window.state('zoomed')
+        except Exception:
+            try:
+                sw = self.window.winfo_screenwidth()
+                sh = self.window.winfo_screenheight()
+                self.window.geometry(f"{sw}x{sh}+0+0")
+            except Exception:
+                # As a last resort, keep the default size
+                self.window.geometry("1400x800")
         
         # Variables
         self.search_var = tk.StringVar()
@@ -451,18 +524,6 @@ class AdminDashboard:
             fg="white"
         )
         self.status_label.pack()
-        
-        # Close button
-        close_btn = tk.Button(
-            self.window,
-            text="❌ Close Dashboard",
-            font=("Arial", 12),
-            bg="#95a5a6",
-            fg="white",
-            cursor="hand2",
-            command=self.window.destroy
-        )
-        close_btn.pack(pady=10)
     
     def clear_table(self):
         """Clear all items from the table"""
@@ -543,7 +604,12 @@ class AdminDashboard:
                 f"Duration: {log_details['duration']}"
             )
             
-            messagebox.showinfo("Log Details", details_text)
+            try:
+                # Attach the dialog to the dashboard window so it appears on top
+                messagebox.showinfo("Log Details", details_text, parent=self.window)
+            except Exception:
+                # Fallback if attaching parent fails
+                messagebox.showinfo("Log Details", details_text)
     
     def export_logs(self):
         """Export current logs to a text file"""
@@ -595,3 +661,261 @@ class AdminDashboard:
         
         except Exception as e:
             messagebox.showerror("Export Error", f"Failed to export logs:\n{e}")
+
+
+class CreateAdminWindow:
+    """Create new admin account window with creator verification"""
+    def __init__(self, parent, db_manager):
+        self.parent = parent
+        self.db_manager = db_manager
+
+        # Create new window
+        self.window = tk.Toplevel(parent)
+        self.window.title("Create Admin Account - EVSU-OC ALIBLOG")
+        self.window.geometry("500x420")
+        self.window.configure(bg="#34495e")
+
+        # Center window
+        self.center_window(500, 420)
+
+        # Variables
+        self.username_var = tk.StringVar()
+        self.password_var = tk.StringVar()
+        self.confirm_var = tk.StringVar()
+
+        self.create_widgets()
+
+        # Make modal-like
+        try:
+            self.window.transient(self.parent)
+            self.window.grab_set()
+        except Exception:
+            pass
+
+    def center_window(self, width, height):
+        screen_width = self.window.winfo_screenwidth()
+        screen_height = self.window.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        self.window.geometry(f"{width}x{height}+{x}+{y}")
+
+    def create_widgets(self):
+        # Back button
+        back_btn = tk.Button(
+            self.window,
+            text="← Back",
+            font=("Arial", 11, "bold"),
+            bg="#95a5a6",
+            fg="white",
+            cursor="hand2",
+            command=lambda: [self.window.destroy(), AdminLoginWindow(self.parent, self.db_manager)]
+        )
+        back_btn.pack(anchor=tk.NW, padx=10, pady=6)
+
+        title_frame = tk.Frame(self.window, bg="#27ae60", pady=20)
+        title_frame.pack(fill=tk.X)
+
+        title_label = tk.Label(
+            title_frame,
+            text="➕ CREATE ADMIN ACCOUNT",
+            font=("Arial", 20, "bold"),
+            bg="#27ae60",
+            fg="white"
+        )
+        title_label.pack()
+
+        form_frame = tk.Frame(self.window, bg="#34495e")
+        form_frame.pack(expand=True, pady=20)
+
+        # Username
+        username_label = tk.Label(
+            form_frame,
+            text="New Username:",
+            font=("Arial", 12, "bold"),
+            bg="#34495e",
+            fg="white"
+        )
+        username_label.grid(row=0, column=0, sticky=tk.W, pady=8, padx=10)
+
+        username_entry = tk.Entry(
+            form_frame,
+            textvariable=self.username_var,
+            font=("Arial", 12),
+            width=28
+        )
+        username_entry.grid(row=0, column=1, pady=8, padx=10)
+        username_entry.focus_set()
+
+        # Password
+        password_label = tk.Label(
+            form_frame,
+            text="Password:",
+            font=("Arial", 12, "bold"),
+            bg="#34495e",
+            fg="white"
+        )
+        password_label.grid(row=1, column=0, sticky=tk.W, pady=8, padx=10)
+
+        password_entry = tk.Entry(
+            form_frame,
+            textvariable=self.password_var,
+            font=("Arial", 12),
+            width=28,
+            show="●"
+        )
+        password_entry.grid(row=1, column=1, pady=8, padx=10)
+
+        # Confirm Password
+        confirm_label = tk.Label(
+            form_frame,
+            text="Confirm Password:",
+            font=("Arial", 12, "bold"),
+            bg="#34495e",
+            fg="white"
+        )
+        confirm_label.grid(row=2, column=0, sticky=tk.W, pady=8, padx=10)
+
+        confirm_entry = tk.Entry(
+            form_frame,
+            textvariable=self.confirm_var,
+            font=("Arial", 12),
+            width=28,
+            show="●"
+        )
+        confirm_entry.grid(row=2, column=1, pady=8, padx=10)
+
+        # Create button
+        create_btn = tk.Button(
+            form_frame,
+            text="✅ CREATE ACCOUNT",
+            font=("Arial", 12, "bold"),
+            bg="#27ae60",
+            fg="white",
+            activebackground="#229954",
+            activeforeground="white",
+            width=22,
+            height=1,
+            cursor="hand2",
+            command=self.create_account
+        )
+        create_btn.grid(row=3, column=0, columnspan=2, pady=18)
+
+        note_label = tk.Label(
+            self.window,
+            text="Note: Creating a new admin requires verification by an existing admin.",
+            font=("Arial", 9),
+            bg="#34495e",
+            fg="#ecf0f1"
+        )
+        note_label.pack(side=tk.BOTTOM, pady=10)
+
+    def prompt_creator_credentials(self):
+        """Prompt for existing admin credentials and verify them."""
+        dialog = tk.Toplevel(self.window)
+        dialog.title("Verify Admin - EVSU-OC ALIBLOG")
+        dialog.geometry("400x200")
+        dialog.configure(bg="#34495e")
+        self.center_child(dialog, 400, 200)
+
+        username_var = tk.StringVar()
+        password_var = tk.StringVar()
+
+        tk.Label(dialog, text="Verifier Username:", bg="#34495e", fg="white", font=("Arial", 11, "bold")).pack(pady=(20,5))
+        u_entry = tk.Entry(dialog, textvariable=username_var, width=30)
+        u_entry.pack()
+
+        tk.Label(dialog, text="Verifier Password:", bg="#34495e", fg="white", font=("Arial", 11, "bold")).pack(pady=(10,5))
+        p_entry = tk.Entry(dialog, textvariable=password_var, show="●", width=30)
+        p_entry.pack()
+
+        result = {'ok': False}
+
+        def on_verify():
+            user = username_var.get().strip()
+            pwd = password_var.get().strip()
+            if not user or not pwd:
+                messagebox.showerror("Verification Error", "Please enter verifier credentials.", parent=dialog)
+                return
+            if self.db_manager.verify_admin(user, pwd):
+                result['ok'] = True
+                dialog.destroy()
+            else:
+                messagebox.showerror("Verification Failed", "Invalid verifier credentials.", parent=dialog)
+                password_var.set("")
+
+        btn_frame = tk.Frame(dialog, bg="#34495e")
+        btn_frame.pack(pady=12)
+
+        verify_btn = tk.Button(btn_frame, text="Verify", bg="#27ae60", fg="white", command=on_verify)
+        verify_btn.pack(side=tk.LEFT, padx=6)
+
+        cancel_btn = tk.Button(btn_frame, text="Cancel", bg="#95a5a6", fg="white", command=dialog.destroy)
+        cancel_btn.pack(side=tk.LEFT, padx=6)
+
+        try:
+            dialog.transient(self.window)
+            dialog.grab_set()
+            self.window.wait_window(dialog)
+        except Exception:
+            # Fallback if modality isn't supported
+            pass
+
+        return result['ok']
+
+    def center_child(self, child, width, height):
+        screen_width = child.winfo_screenwidth()
+        screen_height = child.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        child.geometry(f"{width}x{height}+{x}+{y}")
+
+    def create_account(self):
+        username = self.username_var.get().strip()
+        password = self.password_var.get().strip()
+        confirm = self.confirm_var.get().strip()
+
+        # Validate input
+        if not username:
+            messagebox.showerror("Validation Error", "Please enter a username.", parent=self.window)
+            return
+
+        if len(username) < 3:
+            messagebox.showerror("Validation Error", "Username must be at least 3 characters.", parent=self.window)
+            return
+
+        if not password:
+            messagebox.showerror("Validation Error", "Please enter a password.", parent=self.window)
+            return
+
+        if len(password) < 6:
+            messagebox.showerror("Validation Error", "Password must be at least 6 characters.", parent=self.window)
+            return
+
+        if password != confirm:
+            messagebox.showerror("Validation Error", "Passwords do not match.", parent=self.window)
+            return
+
+        # Ask for verification from an existing admin
+        verified = self.prompt_creator_credentials()
+        if not verified:
+            messagebox.showwarning("Not Verified", "Admin creation requires verification by an existing admin.", parent=self.window)
+            return
+
+        # Try to create the account
+        try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO admin_accounts (username, password)
+                VALUES (?, ?)
+            """, (username, password))
+            conn.commit()
+            conn.close()
+
+            messagebox.showinfo("Success", f"Admin account '{username}' created successfully!", parent=self.window)
+            self.window.destroy()
+
+        except sqlite3.IntegrityError:
+            messagebox.showerror("Error", f"Username '{username}' already exists.", parent=self.window)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to create admin account:\n{e}", parent=self.window)

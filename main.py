@@ -124,23 +124,7 @@ class MainApplication:
             cursor="hand2",
             command=self.open_admin_login
         )
-        admin_btn.pack(pady=15)
-        
-        # Exit button
-        exit_btn = tk.Button(
-            menu_frame,
-            text="❌ EXIT",
-            font=("Arial", 14),
-            bg="#95a5a6",
-            fg="white",
-            activebackground="#7f8c8d",
-            activeforeground="white",
-            width=15,
-            height=1,
-            cursor="hand2",
-            command=self.exit_application
-        )
-        exit_btn.pack(pady=30)
+        admin_btn.pack(pady=15) 
         
         # Footer
         footer_label = tk.Label(
@@ -163,11 +147,6 @@ class MainApplication:
     def open_admin_login(self):
         """Open the admin login window"""
         AdminLoginWindow(self.root, self.db_manager)
-    
-    def exit_application(self):
-        """Exit the application"""
-        if messagebox.askyesno("Exit", "Are you sure you want to exit?"):
-            self.root.quit()
     
     def run(self):
         """Start the application"""

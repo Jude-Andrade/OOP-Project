@@ -59,6 +59,7 @@ class DatabaseManager:
                 name TEXT NOT NULL,
                 id_number TEXT NOT NULL,
                 department TEXT NOT NULL,
+                contact_number TEXT,
                 user_type TEXT NOT NULL CHECK(user_type IN ('Student', 'Teacher', 'Guest')),
                 qr_path TEXT,
                 registration_date TEXT NOT NULL
@@ -91,6 +92,16 @@ class DatabaseManager:
             pass
         
         conn.commit()
+        # Ensure `contact_number` column exists for older databases
+        try:
+            cursor.execute("PRAGMA table_info(registered_users)")
+            columns = [row[1] for row in cursor.fetchall()]
+            if 'contact_number' not in columns:
+                cursor.execute("ALTER TABLE registered_users ADD COLUMN contact_number TEXT")
+                conn.commit()
+        except Exception:
+            # Non-fatal if this fails (e.g., older SQLite or unexpected schema)
+            pass
         conn.close()
     
     # ==================== ADMIN OPERATIONS ====================
@@ -121,7 +132,7 @@ class DatabaseManager:
     
     # ==================== USER REGISTRATION OPERATIONS ====================
     
-    def register_user(self, name, id_number, department, user_type, qr_path):
+    def register_user(self, name, id_number, department, user_type, contact_number, qr_path):
         """
         Register a new user
         
@@ -130,6 +141,7 @@ class DatabaseManager:
             id_number: Student/Teacher ID or "Guest"
             department: Department name or "Guest"
             user_type: Student, Teacher, or Guest
+            contact_number: Contact number string
             qr_path: Path to generated QR code image
             
         Returns:
@@ -143,9 +155,9 @@ class DatabaseManager:
         try:
             cursor.execute("""
                 INSERT INTO registered_users 
-                (name, id_number, department, user_type, qr_path, registration_date)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (name, id_number, department, user_type, qr_path, registration_date))
+                (name, id_number, department, contact_number, user_type, qr_path, registration_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (name, id_number, department, contact_number, user_type, qr_path, registration_date))
             
             conn.commit()
             user_id = cursor.lastrowid
@@ -521,3 +533,75 @@ class DatabaseManager:
             print(f"Database error while deleting user: {e}")
             conn.close()
             return False
+
+    def reset_autoincrement(self, table_name):
+        """
+        Reset the autoincrement sequence for a table in SQLite.
+
+        If the table has rows, the sequence will be set to the current
+        MAX(primary_key). If the table is empty the sqlite_sequence entry
+        for that table will be removed so the next inserted row starts at 1.
+
+        Args:
+            table_name (str): Name of the table to reset (e.g. 'registered_users')
+
+        Returns:
+            bool: True on success, False otherwise
+        """
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        # map known tables to their primary key column names
+        pk_map = {
+            'registered_users': 'user_id',
+            'log_records': 'log_id',
+            'admin_accounts': 'admin_id'
+        }
+
+        pk = pk_map.get(table_name)
+        if not pk:
+            # If unknown table, we still try a generic approach by asking PRAGMA
+            try:
+                cursor.execute(f"PRAGMA table_info({table_name})")
+                cols = cursor.fetchall()
+                # Look for an integer PK column
+                pk = None
+                for col in cols:
+                    # col tuple: (cid, name, type, notnull, dflt_value, pk)
+                    if col[5] == 1:
+                        pk = col[1]
+                        break
+                if not pk:
+                    conn.close()
+                    return False
+            except Exception:
+                conn.close()
+                return False
+
+        try:
+            cursor.execute(f"SELECT MAX({pk}) FROM {table_name}")
+            row = cursor.fetchone()
+            max_id = row[0] if row and row[0] is not None else 0
+
+            # Check if sqlite_sequence exists
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sqlite_sequence'")
+            if cursor.fetchone():
+                if max_id == 0:
+                    # No rows -> remove sequence entry so next row starts at 1
+                    cursor.execute("DELETE FROM sqlite_sequence WHERE name = ?", (table_name,))
+                else:
+                    # Set sequence to max_id so next inserted id will be max_id+1
+                    cursor.execute("UPDATE sqlite_sequence SET seq = ? WHERE name = ?", (max_id, table_name))
+                    if cursor.rowcount == 0:
+                        # No existing row, insert one
+                        cursor.execute("INSERT INTO sqlite_sequence(name, seq) VALUES(?, ?)", (table_name, max_id))
+
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error resetting autoincrement for {table_name}: {e}")
+            conn.close()
+            return False
+
+
