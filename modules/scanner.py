@@ -57,13 +57,34 @@ class ScannerWindow:
         y = (screen_height - height) // 2
         self.window.geometry(f"{width}x{height}+{x}+{y}")
     
+    def go_back(self):
+        """Close the scanner window and return to main menu"""
+        self.window.destroy()
+    
     def create_widgets(self):
         """Create all widgets for the scanner interface"""
         
-        # Title
+        # Title frame with back button
         title_frame = tk.Frame(self.window, bg="#27ae60", pady=25)
         title_frame.pack(fill=tk.X)
         
+        # Back button (left side)
+        back_btn = tk.Button(
+            title_frame,
+            text="← BACK",
+            font=("Arial", 12, "bold"),
+            bg="#e74c3c",
+            fg="white",
+            activebackground="#c0392b",
+            activeforeground="white",
+            cursor="hand2",
+            command=self.go_back,
+            padx=15,
+            pady=5
+        )
+        back_btn.pack(side=tk.LEFT, padx=20)
+        
+        # Title (center)
         title_label = tk.Label(
             title_frame,
             text="📷 QR CODE SCANNER",
@@ -71,16 +92,27 @@ class ScannerWindow:
             bg="#27ae60",
             fg="white"
         )
-        title_label.pack()
+        title_label.pack(expand=True)
+        
+        # Placeholder for balance (right side)
+        placeholder_label = tk.Label(
+            title_frame,
+            text="",
+            font=("Arial", 12, "bold"),
+            bg="#27ae60",
+            fg="white",
+            width=15
+        )
+        placeholder_label.pack(side=tk.RIGHT, padx=20)
         
         subtitle_label = tk.Label(
-            title_frame,
+            self.window,
             text="Scan your QR code to log Time-In or Time-Out",
             font=("Arial", 14),
-            bg="#27ae60",
+            bg="#2c3e50",
             fg="#ecf0f1"
         )
-        subtitle_label.pack()
+        subtitle_label.pack(pady=(10, 0))
         
         # Main content
         main_frame = tk.Frame(self.window, bg="#2c3e50")
@@ -179,21 +211,6 @@ class ScannerWindow:
         
         # Initial status message
         self.update_status("Ready to scan. Waiting for QR code...", "info")
-        
-        # Close button
-        close_btn = tk.Button(
-            self.window,
-            text="❌ Close Scanner",
-            font=("Arial", 12),
-            bg="#95a5a6",
-            fg="white",
-            activebackground="#7f8c8d",
-            activeforeground="white",
-            width=20,
-            cursor="hand2",
-            command=self.window.destroy
-        )
-        close_btn.pack(pady=10)
     
     def update_time(self):
         """Update the current time display"""
@@ -301,7 +318,7 @@ class ScannerWindow:
                     "success"
                 )
                 
-                # Play success sound or visual feedback (optional)
+                # Play success sound or visual feedback
                 self.window.bell()
             else:
                 self.update_status("Failed to record Time-Out. Please try again.", "error")
@@ -326,7 +343,7 @@ class ScannerWindow:
                     "success"
                 )
                 
-                # Play success sound or visual feedback (optional)
+                # Play success sound or visual feedback
                 self.window.bell()
             else:
                 self.update_status("Failed to record Time-In. Please try again.", "error")

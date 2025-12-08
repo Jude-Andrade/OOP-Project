@@ -5,10 +5,10 @@ This module handles user registration and QR code generation.
 Users can register as Student, Teacher, or Guest and receive a QR code.
 """
 
+import os
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from PIL import Image, ImageTk
-import os
 from utils.qr_generator import QRCodeGenerator
 
 
@@ -66,10 +66,25 @@ class RegistrationWindow:
     def create_widgets(self):
         """Create all widgets for the registration form"""
         
-        # Title
+        # Title frame with back button
         title_frame = tk.Frame(self.window, bg="#3498db", pady=20)
         title_frame.pack(fill=tk.X)
         
+        # Back button (left side)
+        back_btn = tk.Button(
+            title_frame,
+            text="← BACK",
+            font=("Arial", 12, "bold"),
+            bg="#e74c3c",
+            fg="white",
+            activebackground="#c0392b",
+            activeforeground="white",
+            cursor="hand2",
+            command=self.go_back
+        )
+        back_btn.pack(side=tk.LEFT, padx=20)
+        
+        # Title (center)
         title_label = tk.Label(
             title_frame,
             text="📝 USER REGISTRATION",
@@ -77,7 +92,7 @@ class RegistrationWindow:
             bg="#3498db",
             fg="white"
         )
-        title_label.pack()
+        title_label.pack(expand=True)
         
         # Main content frame
         main_frame = tk.Frame(self.window, bg="#ecf0f1")
@@ -89,7 +104,11 @@ class RegistrationWindow:
         
         # Inner centered form container with grid
         inner_form = tk.Frame(form_frame, bg="#ecf0f1")
-        inner_form.pack(expand=True, anchor=tk.CENTER)
+        inner_form.pack(expand=True, anchor=tk.CENTER, pady=10)
+        
+        # Ensure consistent grid columns so labels and entries align
+        inner_form.grid_columnconfigure(0, weight=0, minsize=180)  # label column (fixed width)
+        inner_form.grid_columnconfigure(1, weight=1)               # entry column (expandable)
         
         # User Type Selection
         type_label = tk.Label(
@@ -97,10 +116,9 @@ class RegistrationWindow:
             text="User Type:",
             font=("Arial", 14, "bold"),
             bg="#ecf0f1",
-            width=15,
             anchor=tk.W
         )
-        type_label.grid(row=0, column=0, sticky=tk.W, pady=(20, 15), padx=(0, 20))
+        type_label.grid(row=0, column=0, sticky=tk.W, pady=(20, 15), padx=(10, 10))
         
         type_frame = tk.Frame(inner_form, bg="#ecf0f1")
         type_frame.grid(row=0, column=1, sticky=tk.W, pady=(20, 15))
@@ -113,9 +131,10 @@ class RegistrationWindow:
                 value=user_type,
                 font=("Arial", 12),
                 bg="#ecf0f1",
+                anchor=tk.W,
                 command=self.update_fields_based_on_type
             )
-            rb.pack(side=tk.LEFT, padx=10)
+            rb.pack(side=tk.LEFT, padx=8)
         
         # Name Field
         name_label = tk.Label(
@@ -123,19 +142,16 @@ class RegistrationWindow:
             text="Full Name:",
             font=("Arial", 14, "bold"),
             bg="#ecf0f1",
-            width=15,
-            anchor=tk.W,
-            height=1
+            anchor=tk.W
         )
-        name_label.grid(row=1, column=0, sticky=tk.W + tk.E, pady=(30, 8), padx=(0, 20))
+        name_label.grid(row=1, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
         
         self.name_entry = tk.Entry(
             inner_form,
             textvariable=self.name_var,
-            font=("Arial", 14),
-            width=40
+            font=("Arial", 14)
         )
-        self.name_entry.grid(row=1, column=1, sticky=tk.W, pady=(30, 25))
+        self.name_entry.grid(row=1, column=1, sticky=tk.W+tk.E, pady=(12, 8))
         
         # ID Number Field
         self.id_label = tk.Label(
@@ -143,19 +159,16 @@ class RegistrationWindow:
             text="ID Number:",
             font=("Arial", 14, "bold"),
             bg="#ecf0f1",
-            width=15,
-            anchor=tk.W,
-            height=1
+            anchor=tk.W
         )
-        self.id_label.grid(row=2, column=0, sticky=tk.W + tk.E, pady=(25, 8), padx=(0, 20))
+        self.id_label.grid(row=2, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
         
         self.id_entry = tk.Entry(
             inner_form,
             textvariable=self.id_var,
-            font=("Arial", 14),
-            width=40
+            font=("Arial", 14)
         )
-        self.id_entry.grid(row=2, column=1, sticky=tk.W, pady=(25, 25))
+        self.id_entry.grid(row=2, column=1, sticky=tk.W+tk.E, pady=(12, 8))
         
         # Department Field
         self.dept_label = tk.Label(
@@ -163,19 +176,16 @@ class RegistrationWindow:
             text="Department:",
             font=("Arial", 14, "bold"),
             bg="#ecf0f1",
-            width=15,
-            anchor=tk.W,
-            height=1
+            anchor=tk.W
         )
-        self.dept_label.grid(row=3, column=0, sticky=tk.W + tk.E, pady=(25, 8), padx=(0, 20))
+        self.dept_label.grid(row=3, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
         
         self.dept_entry = tk.Entry(
             inner_form,
             textvariable=self.department_var,
-            font=("Arial", 14),
-            width=40
+            font=("Arial", 14)
         )
-        self.dept_entry.grid(row=3, column=1, sticky=tk.W, pady=(25, 25))
+        self.dept_entry.grid(row=3, column=1, sticky=tk.W+tk.E, pady=(12, 8))
 
         # Contact Number Field
         self.contact_label = tk.Label(
@@ -183,23 +193,20 @@ class RegistrationWindow:
             text="Contact Number:",
             font=("Arial", 14, "bold"),
             bg="#ecf0f1",
-            width=15,
-            anchor=tk.W,
-            height=1
+            anchor=tk.W
         )
-        self.contact_label.grid(row=4, column=0, sticky=tk.W + tk.E, pady=(25, 8), padx=(0, 20))
+        self.contact_label.grid(row=4, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
 
         self.contact_entry = tk.Entry(
             inner_form,
             textvariable=self.contact_var,
-            font=("Arial", 14),
-            width=40
+            font=("Arial", 14)
         )
-        self.contact_entry.grid(row=4, column=1, sticky=tk.W, pady=(25, 25))
+        self.contact_entry.grid(row=4, column=1, sticky=tk.W+tk.E, pady=(12, 8))
         
         # Buttons
         button_frame = tk.Frame(inner_form, bg="#ecf0f1")
-        button_frame.grid(row=5, column=0, columnspan=2, pady=40)
+        button_frame.grid(row=5, column=0, columnspan=2, pady=30)
         
         register_btn = tk.Button(
             button_frame,
@@ -232,8 +239,9 @@ class RegistrationWindow:
         clear_btn.pack(side=tk.LEFT, padx=5)
         
         # QR Code Display Frame (right side)
-        qr_frame = tk.Frame(main_frame, bg="white", relief=tk.RIDGE, bd=2)
-        qr_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=False, padx=(20, 0))
+        qr_frame = tk.Frame(main_frame, bg="white", relief=tk.RIDGE, bd=2, width=320)
+        qr_frame.pack(side=tk.RIGHT, fill=tk.Y, expand=False, padx=(20, 0))
+        qr_frame.pack_propagate(False)
         
         qr_title = tk.Label(
             qr_frame,
@@ -327,29 +335,16 @@ class RegistrationWindow:
             
             # Check if ID already exists (except for guests)
             if self.db_manager.check_id_exists(id_number):
-                # Notify the user but keep the registration window open.
-                # Attach the dialog to this window so focus returns here.
                 messagebox.showwarning(
                     "Duplicate ID",
                     f"ID number '{id_number}' is already registered.\nPlease use a different ID.",
                     parent=self.window
                 )
-                # Return focus to the ID entry so the user can correct it.
-                try:
-                    self.id_entry.focus_set()
-                    self.id_entry.selection_range(0, tk.END)
-                except Exception:
-                    pass
                 return False
 
         # Contact number is required for all user types
         if not contact_number:
             messagebox.showerror("Validation Error", "Please enter a contact number.", parent=self.window)
-            try:
-                self.contact_entry.focus_set()
-                self.contact_entry.selection_range(0, tk.END)
-            except Exception:
-                pass
             return False
         
         return True
@@ -452,12 +447,15 @@ class RegistrationWindow:
         
         if save_path:
             try:
-                # Copy the file
                 import shutil
                 shutil.copy(self.generated_qr_path, save_path)
-                messagebox.showinfo("Success", f"QR Code saved to:\n{save_path}", parent=self.window)
+                messagebox.showinfo("Success", f"QR code saved to:\n{save_path}", parent=self.window)
             except Exception as e:
-                messagebox.showerror("Error", f"Failed to save QR code:\n{e}", parent=self.window)
+                messagebox.showerror("Error", f"Failed to save QR code: {e}", parent=self.window)
+    
+    def go_back(self):
+        """Close the registration window and return to main menu"""
+        self.window.destroy()
     
     def clear_form(self):
         """Clear all form fields"""
