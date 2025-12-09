@@ -12,6 +12,7 @@ from PIL import Image, ImageTk
 from utils.qr_generator import QRCodeGenerator
 
 
+
 class RegistrationWindow:
     """Registration window for new users"""
     

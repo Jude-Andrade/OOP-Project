@@ -12,6 +12,8 @@ from database.db_manager import DatabaseManager
 from modules.registration import RegistrationWindow
 from modules.scanner import ScannerWindow
 from modules.admin_panel import AdminLoginWindow
+from PIL import Image, ImageTk
+import os
 
 
 class MainApplication:
@@ -27,16 +29,38 @@ class MainApplication:
         self.root = tk.Tk()
         self.root.title("EVSU-OC ALIBLOG - Library Logbook System")
         self.root.geometry("800x600")
-        self.root.configure(bg="#2c3e50")
         
+        bg_path = os.path.join("assets", "makmak1.png")
+        if os.path.exists(bg_path):
+            # Load original image
+            self.bg_orig = Image.open(bg_path)
+            
+            # Initial resize to window size
+            bg_img = self.bg_orig.resize((800, 600), Image.Resampling.LANCZOS)
+            self.bg_photo = ImageTk.PhotoImage(bg_img)
+
+            # Create a Label to hold the background
+            self.bg_label = tk.Label(self.root, image=self.bg_photo)
+            self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+            
+            # Bind resizing
+            self.root.bind("<Configure>", self.resize_bg)
+
+                    
         # Maximize main window by default (best-effort)
-        try:
             self.root.state('zoomed')
-        except Exception:
-            # Fall back to manual centering if state() is not supported
-            self.center_window(self.root, 800, 600)
         
         self.create_main_menu()
+        
+    def resize_bg(self, event):
+        # Avoid very small events
+        if event.width < 2 or event.height < 2:
+            return
+        # Resize original image to new window size
+        resized = self.bg_orig.resize((event.width, event.height), Image.Resampling.LANCZOS)
+        self.bg_photo = ImageTk.PhotoImage(resized)
+        self.bg_label.config(image=self.bg_photo)
+
     
     def center_window(self, window, width, height):
         """Center a window on the screen"""
@@ -48,91 +72,115 @@ class MainApplication:
     
     def create_main_menu(self):
         """Create the main menu interface"""
-        # Clear window
         for widget in self.root.winfo_children():
-            widget.destroy()
-        
+            if widget != self.bg_label:  # skip background
+                widget.destroy()
+
         # Title frame
-        title_frame = tk.Frame(self.root, bg="#34495e", pady=30)
+        title_frame = tk.Frame(self.root, bg="#6B1F1F", pady=30)
         title_frame.pack(fill=tk.X)
         
+        # Create a container frame for logo + title (centered)
+        header_container = tk.Frame(title_frame, bg="#6B1F1F")
+        header_container.pack()   # CENTER by default
+                
+        # Load logo image
+        logo_path = os.path.join("assets", "ebsulogo2.0.png")  # Example path
+        if os.path.exists(logo_path):
+            logo_img = Image.open(logo_path)
+            logo_img = logo_img.resize((80, 80), Image.Resampling.LANCZOS)
+            self.logo_photo = ImageTk.PhotoImage(logo_img)
+
+            logo_label = tk.Label(
+                #title_frame,
+                header_container,
+                image=self.logo_photo,
+                bg="#6B1F1F"
+                )
+            logo_label.pack(side=tk.LEFT, padx=20)
+            
         title_label = tk.Label(
-            title_frame,
+            #title_frame,
+            header_container,
             text="EVSU-OC ALIBLOG",
-            font=("Arial", 32, "bold"),
-            bg="#34495e",
+            font=("League Spartan", 35, "bold"),
+            bg="#6B1F1F",
             fg="white"
         )
         title_label.pack()
         
         subtitle_label = tk.Label(
-            title_frame,
+            #title_frame,
+            header_container,
             text="Automated Library Logbook System",
             font=("Arial", 16),
-            bg="#34495e",
+            bg="#6B1F1F",
             fg="#ecf0f1"
         )
         subtitle_label.pack()
         
         # Menu buttons frame
-        menu_frame = tk.Frame(self.root, bg="#2c3e50")
-        menu_frame.pack(expand=True)
+        # menu_frame = tk.Frame(self.root, bg="#2c3e50")
+        # menu_frame.pack(expand=True)
         
+        menu_frame = tk.Frame(self.root, width=500, height=400)
+        menu_frame.pack(expand=True)
+    
         # Register button
         register_btn = tk.Button(
             menu_frame,
-            text="📝 REGISTER NEW USER",
+            text="📝 REGISTER USER",
             font=("Arial", 18, "bold"),
-            bg="#3498db",
+            bg="#00C0EF",
             fg="white",
-            activebackground="#2980b9",
+            activebackground="#00C0EF",
             activeforeground="white",
             width=25,
             height=2,
             cursor="hand2",
             command=self.open_registration
         )
-        register_btn.pack(pady=15)
+        register_btn.pack(pady=15, padx=20)
         
         # Scanner button
         scanner_btn = tk.Button(
             menu_frame,
-            text="📷 QR SCANNER (TIME-IN/OUT)",
+            text="📷 QR SCANNER",
             font=("Arial", 18, "bold"),
-            bg="#2ecc71",
+            bg="#00A65A",
             fg="white",
-            activebackground="#27ae60",
+            activebackground="#00A65A",
             activeforeground="white",
             width=25,
             height=2,
             cursor="hand2",
             command=self.open_scanner
         )
-        scanner_btn.pack(pady=15)
+        scanner_btn.pack(pady=15, padx=20)
         
         # Admin button
         admin_btn = tk.Button(
             menu_frame,
             text="🔐 ADMIN PANEL",
             font=("Arial", 18, "bold"),
-            bg="#e74c3c",
+            bg="#F39C12",
             fg="white",
-            activebackground="#c0392b",
+            activebackground="#F39C12",
             activeforeground="white",
             width=25,
             height=2,
             cursor="hand2",
             command=self.open_admin_login
         )
-        admin_btn.pack(pady=15) 
+        admin_btn.pack(pady=15, padx=20) 
         
         # Footer
         footer_label = tk.Label(
             self.root,
-            text="Eastern Visayas State University - Ormoc Campus Library",
+            text="Eastern Visayas State University - Ormoc Campus Library\n© Information Technology Students 2025",
             font=("Arial", 10),
-            bg="#2c3e50",
-            fg="#95a5a6"
+            bg="#ecf0f1",
+            fg="#000000"
         )
         footer_label.pack(side=tk.BOTTOM, pady=10)
     
