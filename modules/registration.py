@@ -28,6 +28,14 @@ class RegistrationWindow:
         self.db_manager = db_manager
         self.qr_generator = QRCodeGenerator()
         
+        # Predefined list of departments for dropdown
+        self.departments = [
+        "Dept. of Education",
+        "Dept. of Technology",
+        "Dept. of Engineering",
+        "Dept. of Information Technology",
+        ]
+        
         # Create new window
         self.window = tk.Toplevel(parent)
         self.window.title("User Registration - EVSU-OC ALIBLOG")
@@ -68,14 +76,49 @@ class RegistrationWindow:
         """Create all widgets for the registration form"""
         
         # Title frame with back button
-        title_frame = tk.Frame(self.window, bg="#3498db", pady=20)
+        title_frame = tk.Frame(self.window, bg="#6B1F1F", pady=20)
         title_frame.pack(fill=tk.X)
         
-        # Back button (left side)
+        # # Back button (left side)
+        # back_btn = tk.Button(
+        #     title_frame,
+        #     text="← BACK",
+        #     font=("Arial", 12, "bold"),
+        #     bg="#e74c3c",
+        #     fg="white",
+        #     activebackground="#c0392b",
+        #     activeforeground="white",
+        #     cursor="hand2",
+        #     command=self.go_back
+        # )
+        # back_btn.pack(side=tk.LEFT, padx=20)
+        
+        # # Title (center)
+        # title_label = tk.Label(
+        #     title_frame,
+        #     text="📝 USER REGISTRATION",
+        #     font=("League Spartan", 28, "bold"),
+        #     bg="#6B1F1F",
+        #     fg="white"
+        # )
+        # title_label.pack(expand=True)
+        
+        # Title frame with back button
+        # Title Frame
+        title_frame = tk.Frame(self.window, bg="#6B1F1F", height=170)
+        title_frame.pack(fill=tk.X)
+        title_frame.pack_propagate(False)
+
+        # Configure 3 equal-weight columns
+        title_frame.grid_columnconfigure(0, weight=1)
+        title_frame.grid_columnconfigure(1, weight=1)
+        title_frame.grid_columnconfigure(2, weight=1)
+
+        # Back Button (Left)
         back_btn = tk.Button(
             title_frame,
-            text="← BACK",
-            font=("Arial", 12, "bold"),
+            text="BACK",
+            font=("Arial", 14, "bold"),
             bg="#e74c3c",
             fg="white",
             activebackground="#c0392b",
@@ -83,21 +126,27 @@ class RegistrationWindow:
             cursor="hand2",
             command=self.go_back
         )
-        back_btn.pack(side=tk.LEFT, padx=20)
-        
-        # Title (center)
+        back_btn.grid(row=0, column=0, sticky="w", padx=40)
+
+        # Title (Center)
         title_label = tk.Label(
             title_frame,
-            text="📝 USER REGISTRATION",
-            font=("Arial", 24, "bold"),
-            bg="#3498db",
-            fg="white"
+            text="USER REGISTRATION",
+            font=("League Spartan", 30, "bold"),
+            bg="#6B1F1F",
+            fg="white",
+            pady=20
         )
-        title_label.pack(expand=True)
-        
+        title_label.grid(row=0, column=1)   # <-- always centered PERFECTLY
+
+        # Empty placeholder so the title stays centered even with left button
+        placeholder = tk.Label(title_frame, bg="#6B1F1F")
+        placeholder.grid(row=0, column=2, sticky="e", padx=40)
+
+
         # Main content frame
         main_frame = tk.Frame(self.window, bg="#ecf0f1")
-        main_frame.pack(expand=True, fill=tk.BOTH, padx=30, pady=20)
+        main_frame.pack(expand=True, fill=tk.BOTH, padx=30, pady=120)
         
         # Form frame (left side)
         form_frame = tk.Frame(main_frame, bg="#ecf0f1")
@@ -171,22 +220,56 @@ class RegistrationWindow:
         )
         self.id_entry.grid(row=2, column=1, sticky=tk.W+tk.E, pady=(12, 8))
         
-        # Department Field
-        self.dept_label = tk.Label(
-            inner_form,
-            text="Department:",
-            font=("Arial", 14, "bold"),
-            bg="#ecf0f1",
-            anchor=tk.W
-        )
-        self.dept_label.grid(row=3, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
+        # # Department Field
+        # self.dept_label = tk.Label(
+        #     inner_form,
+        #     text="Department:",
+        #     font=("Arial", 14, "bold"),
+        #     bg="#ecf0f1",
+        #     anchor=tk.W
+        # )
+        # self.dept_label.grid(row=3, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
         
-        self.dept_entry = tk.Entry(
-            inner_form,
-            textvariable=self.department_var,
-            font=("Arial", 14)
-        )
+        # self.dept_entry = tk.Entry(
+        #     inner_form,
+        #     textvariable=self.department_var,
+        #     font=("Arial", 14)
+        # )
+        # self.dept_entry.grid(row=3, column=1, sticky=tk.W+tk.E, pady=(12, 8))
+        
+        self.dept_label = tk.Label(
+        inner_form,
+        text="Department:",
+        font=("Arial", 14, "bold"),
+        bg="#ecf0f1",
+        anchor=tk.W
+    )
+        self.dept_label.grid(row=3, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
+
+    #     self.dept_entry = ttk.Combobox(
+    #     inner_form,
+    #     textvariable=self.department_var,
+    #     font=("Arial", 14),
+    #     values=self.departments,
+    #     state="readonly"
+    # )
+    
+        self.dept_entry = ttk.Combobox(
+        inner_form,
+        textvariable=self.department_var,
+        font=("Arial", 14),
+        values=self.departments,
+        state="readonly"
+    )
         self.dept_entry.grid(row=3, column=1, sticky=tk.W+tk.E, pady=(12, 8))
+        self.dept_entry.set("Select Department")
+
+    # Change dropdown list font
+        self.window.option_add("*TCombobox*Listbox.font",   ("Arial", 14))
+    
+        self.window.option_add("*TCombobox*Listbox.font", ("Arial", 14))
+        self.dept_entry.grid(row=3, column=1, sticky=tk.W+tk.E, pady=(12, 8))
+        self.dept_entry.set("Select Department")
 
         # Contact Number Field
         self.contact_label = tk.Label(
@@ -246,7 +329,7 @@ class RegistrationWindow:
         
         qr_title = tk.Label(
             qr_frame,
-            text="Generated QR Code",
+            text="GENERATE QR CODE",
             font=("Arial", 14, "bold"),
             bg="white"
         )
@@ -292,14 +375,18 @@ class RegistrationWindow:
             self.dept_label.grid_remove()
             self.dept_entry.grid_remove()
             self.id_var.set("Guest")
+            # self.department_var.set("Guest")
+            self.dept_entry.config(state="disabled")
             self.department_var.set("Guest")
         else:
             # Show fields for Student/Teacher
             self.id_label.grid()
             self.id_entry.grid()
             self.dept_label.grid()
+            # self.dept_entry.grid()
+            # self.id_entry.config(state=tk.NORMAL)
             self.dept_entry.grid()
-            self.id_entry.config(state=tk.NORMAL)
+            self.dept_entry.config(state="readonly")
             self.dept_entry.config(state=tk.NORMAL)
             if self.id_var.get() == "Guest":
                 self.id_var.set("")
