@@ -29,6 +29,7 @@ class MainApplication:
         self.root = tk.Tk()
         self.root.title("EVSU-OC ALIBLOG - Library Logbook System")
         self.root.geometry("800x600")
+        self.root.resizable(False, False)
         
         bg_path = os.path.join("assets", "makmak1.png")
         if os.path.exists(bg_path):
@@ -48,9 +49,11 @@ class MainApplication:
 
                     
         # Maximize main window by default (best-effort)
-            self.root.state('zoomed')
+        self.root.state('zoomed')
         
         self.create_main_menu()
+        self.admin_window = None  # Track admin window
+
         
     def resize_bg(self, event):
         # Avoid very small events
@@ -74,7 +77,7 @@ class MainApplication:
         """Create the main menu interface"""
         for widget in self.root.winfo_children():
             if widget != self.bg_label:  # skip background
-                widget.destroy()
+                widget.destroy()    
 
         # Title frame
         title_frame = tk.Frame(self.root, bg="#6B1F1F", pady=30)
@@ -187,14 +190,23 @@ class MainApplication:
     def open_registration(self):
         """Open the registration window"""
         RegistrationWindow(self.root, self.db_manager)
+        self.root.withdraw()
     
     def open_scanner(self):
         """Open the scanner window"""
         ScannerWindow(self.root, self.db_manager)
+        self.root.withdraw()
     
     def open_admin_login(self):
-        """Open the admin login window"""
-        AdminLoginWindow(self.root, self.db_manager)
+        """Open the admin login window (single instance only)"""
+        if self.admin_window is None or not tk.Toplevel.winfo_exists(self.admin_window.window):
+            self.admin_window = AdminLoginWindow(self.root, self.db_manager)
+        else:
+            # Optional: bring the existing window to front
+            self.admin_window.window.lift()
+            self.admin_window.window.focus_force()
+
+        
     
     def run(self):
         """Start the application"""

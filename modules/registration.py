@@ -13,6 +13,7 @@ from utils.qr_generator import QRCodeGenerator
 
 
 
+
 class RegistrationWindow:
     """Registration window for new users"""
     
@@ -41,6 +42,7 @@ class RegistrationWindow:
         self.window.title("User Registration - EVSU-OC ALIBLOG")
         self.window.geometry("900x700")
         self.window.configure(bg="#ecf0f1")
+        self.window.resizable(False, False)
         
         # Maximize window on popup
         try:
@@ -544,6 +546,11 @@ class RegistrationWindow:
     def go_back(self):
         """Close the registration window and return to main menu"""
         self.window.destroy()
+        self.parent.deiconify()
+        try:
+            self.parent.state('zoomed')  # Re-maximize the main window
+        except Exception:
+            pass
     
     def clear_form(self):
         """Clear all form fields"""

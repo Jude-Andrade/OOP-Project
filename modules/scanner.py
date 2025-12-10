@@ -60,6 +60,11 @@ class ScannerWindow:
     def go_back(self):
         """Close the scanner window and return to main menu"""
         self.window.destroy()
+        self.parent.deiconify()
+        try:
+            self.parent.state('zoomed')  # Re-maximize the main window
+        except Exception:
+            pass
     
     def create_widgets(self):
         """Create all widgets for the scanner interface"""
