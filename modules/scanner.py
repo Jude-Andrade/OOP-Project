@@ -30,7 +30,7 @@ class ScannerWindow:
         self.window = tk.Toplevel(parent)
         self.window.title("QR Scanner - EVSU-OC ALIBLOG")
         self.window.geometry("800x600")
-        self.window.configure(bg="#2c3e50")
+        self.window.configure(bg="#FFFDD0")
         
         # Maximize window on popup
         try:
@@ -70,17 +70,17 @@ class ScannerWindow:
         """Create all widgets for the scanner interface"""
         
         # Title frame with back button
-        title_frame = tk.Frame(self.window, bg="#27ae60", pady=25)
+        title_frame = tk.Frame(self.window, bg="#6B1F1F", pady=25)
         title_frame.pack(fill=tk.X)
         
         # Back button (left side)
         back_btn = tk.Button(
             title_frame,
-            text="← BACK",
+            text="BACK",
             font=("Arial", 12, "bold"),
-            bg="#e74c3c",
+            bg="#E1AD01",
             fg="white",
-            activebackground="#c0392b",
+            activebackground="#E1AD01",
             activeforeground="white",
             cursor="hand2",
             command=self.go_back,
@@ -92,9 +92,9 @@ class ScannerWindow:
         # Title (center)
         title_label = tk.Label(
             title_frame,
-            text="📷 QR CODE SCANNER",
-            font=("Arial", 28, "bold"),
-            bg="#27ae60",
+            text="QR CODE SCANNER",
+            font=("League Spartan", 30, "bold"),
+            bg="#6B1F1F",
             fg="white"
         )
         title_label.pack(expand=True)
@@ -104,7 +104,7 @@ class ScannerWindow:
             title_frame,
             text="",
             font=("Arial", 12, "bold"),
-            bg="#27ae60",
+            bg="#6B1F1F",
             fg="white",
             width=15
         )
@@ -114,25 +114,25 @@ class ScannerWindow:
             self.window,
             text="Scan your QR code to log Time-In or Time-Out",
             font=("Arial", 14),
-            bg="#2c3e50",
-            fg="#ecf0f1"
+            bg="#FFFDD0",
+            fg="#2c2c2c"
         )
         subtitle_label.pack(pady=(10, 0))
         
         # Main content
-        main_frame = tk.Frame(self.window, bg="#2c3e50")
+        main_frame = tk.Frame(self.window, bg="#FFFDD0")
         main_frame.pack(expand=True, fill=tk.BOTH, padx=40, pady=30)
         
         # Current time display
-        self.time_frame = tk.Frame(main_frame, bg="#34495e", relief=tk.RIDGE, bd=2)
+        self.time_frame = tk.Frame(main_frame, bg="#FFFDD0", relief=tk.RIDGE, bd=2)
         self.time_frame.pack(fill=tk.X, pady=(0, 30))
         
         time_label_text = tk.Label(
             self.time_frame,
             text="Current Time:",
             font=("Arial", 14),
-            bg="#34495e",
-            fg="#bdc3c7"
+            bg="#FFFDD0",
+            fg="#2c2c2c"
         )
         time_label_text.pack(pady=(10, 0))
         
@@ -140,8 +140,8 @@ class ScannerWindow:
             self.time_frame,
             text="",
             font=("Arial", 32, "bold"),
-            bg="#34495e",
-            fg="#2ecc71"
+            bg="#FFFDD0",
+            fg="#2c2c2c"
         )
         self.time_display.pack(pady=(0, 10))
         
@@ -153,13 +153,13 @@ class ScannerWindow:
             main_frame,
             text="Place QR code in front of scanner or paste scanned data below:",
             font=("Arial", 13),
-            bg="#2c3e50",
-            fg="white"
+            bg="#FFFDD0",
+            fg="black"
         )
         instruction_label.pack(pady=(0, 15))
         
         # QR Input field (where scanner inputs data)
-        input_frame = tk.Frame(main_frame, bg="#2c3e50")
+        input_frame = tk.Frame(main_frame, bg="#FFFDD0")
         input_frame.pack(pady=10)
         
         self.qr_entry = tk.Entry(
@@ -178,9 +178,9 @@ class ScannerWindow:
             input_frame,
             text="✅ Process Scan",
             font=("Arial", 14, "bold"),
-            bg="#3498db",
+            bg="#E1AD01",
             fg="white",
-            activebackground="#2980b9",
+            activebackground="#E1AD01",
             activeforeground="white",
             width=20,
             height=2,
@@ -190,23 +190,23 @@ class ScannerWindow:
         scan_btn.pack(pady=20)
         
         # Status display
-        self.status_frame = tk.Frame(main_frame, bg="#34495e", relief=tk.RIDGE, bd=2)
+        self.status_frame = tk.Frame(main_frame, bg="#FFFDD0", relief=tk.RIDGE, bd=2)
         self.status_frame.pack(fill=tk.BOTH, expand=True, pady=20)
         
         status_title = tk.Label(
             self.status_frame,
             text="Scan Status",
             font=("Arial", 16, "bold"),
-            bg="#34495e",
-            fg="white"
+            bg="#FFFDD0",
+            fg="black"
         )
         status_title.pack(pady=10)
         
         self.status_text = tk.Text(
             self.status_frame,
             font=("Arial", 12),
-            bg="#2c3e50",
-            fg="#ecf0f1",
+            bg="#FFFDD0",
+            fg="#2c2c2c",
             height=8,
             width=70,
             state=tk.DISABLED,
@@ -249,14 +249,14 @@ class ScannerWindow:
             color = "#e74c3c"
             prefix = "❌ ERROR"
         else:
-            color = "#3498db"
+            color = "#6B1F1F"
             prefix = "ℹ INFO"
         
         self.status_text.insert(tk.END, f"[{timestamp}] {prefix}\n\n", "header")
         self.status_text.insert(tk.END, message, "message")
         
         self.status_text.tag_config("header", foreground=color, font=("Arial", 12, "bold"))
-        self.status_text.tag_config("message", foreground="#ecf0f1", font=("Arial", 12))
+        self.status_text.tag_config("message", foreground="#2c2c2c", font=("Arial", 12))
         
         self.status_text.config(state=tk.DISABLED)
     

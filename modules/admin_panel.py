@@ -34,7 +34,7 @@ class AdminLoginWindow:
         self.window.geometry("720x520")
         # prevent resizing to keep layout stable
         self.window.resizable(False, False)
-        self.window.configure(bg="#34495e")
+        self.window.configure(bg="#FFFDD0")
         
         # Center window
         self.center_window(720, 520)
@@ -83,20 +83,20 @@ class AdminLoginWindow:
         """Create login form widgets"""
         
         # Title
-        title_frame = tk.Frame(self.window, bg="#e74c3c", pady=30)
+        title_frame = tk.Frame(self.window, bg="#6B1F1F", pady=30)
         title_frame.pack(fill=tk.X)
         
         title_label = tk.Label(
             title_frame,
-            text="🔐 ADMIN LOGIN",
-            font=("Arial", 26, "bold"),
-            bg="#e74c3c",
+            text="ADMIN LOGIN",
+            font=("Arial", 30, "bold"),
+            bg="#6B1F1F",
             fg="white"
         )
         title_label.pack()
         
         # Form frame
-        form_frame = tk.Frame(self.window, bg="#34495e")
+        form_frame = tk.Frame(self.window, bg="#FFFDD0")
         form_frame.pack(expand=True, pady=30)
         
         # Username
@@ -104,8 +104,8 @@ class AdminLoginWindow:
             form_frame,
             text="Username:",
             font=("Arial", 14, "bold"),
-            bg="#34495e",
-            fg="white"
+            bg="#FFFDD0",
+            fg="black"
         )
         username_label.grid(row=0, column=0, sticky=tk.W, pady=10, padx=10)
         
@@ -125,8 +125,8 @@ class AdminLoginWindow:
             form_frame,
             text="Password:",
             font=("Arial", 14, "bold"),
-            bg="#34495e",
-            fg="white"
+            bg="#FFFDD0",
+            fg="black"
         )
         password_label.grid(row=1, column=0, sticky=tk.W, pady=10, padx=10)
         
@@ -149,9 +149,9 @@ class AdminLoginWindow:
             form_frame,
             text="✅ LOGIN",
             font=("Arial", 14, "bold"),
-            bg="#27ae60",
+            bg="#6B1F1F",
             fg="white",
-            activebackground="#229954",
+            activebackground="#6B1F1F",
             activeforeground="white",
             width=20,
             height=2,
@@ -165,9 +165,9 @@ class AdminLoginWindow:
             form_frame,
             text="➕ Create Admin",
             font=("Arial", 11, "bold"),
-            bg="#3498db",
+            bg="#E1AD01",
             fg="white",
-            activebackground="#2980b9",
+            activebackground="#E1AD01",
             activeforeground="white",
             width=20,
             height=1,
@@ -277,20 +277,20 @@ class AdminDashboard:
         """Create dashboard widgets"""
         
         # Title bar
-        title_frame = tk.Frame(self.window, bg="#e74c3c", pady=15)
+        title_frame = tk.Frame(self.window, bg="#6B1F1F", pady=15)
         title_frame.pack(fill=tk.X)
         
         title_label = tk.Label(
             title_frame,
-            text="📊 ADMIN DASHBOARD",
-            font=("Arial", 24, "bold"),
-            bg="#e74c3c",
+            text="ADMIN DASHBOARD",
+            font=("Arial", 25, "bold"),
+            bg="#6B1F1F",
             fg="white"
         )
         title_label.pack()
         
         # Control panel
-        control_frame = tk.Frame(self.window, bg="#34495e", pady=15)
+        control_frame = tk.Frame(self.window, bg="#6B1F1F", pady=15)
         control_frame.pack(fill=tk.X, padx=20, pady=(10, 0))
         
         # Search section
@@ -298,7 +298,7 @@ class AdminDashboard:
             control_frame,
             text="Search:",
             font=("Arial", 12, "bold"),
-            bg="#34495e",
+            bg="#6B1F1F",
             fg="white"
         )
         search_label.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
@@ -316,7 +316,7 @@ class AdminDashboard:
             control_frame,
             text="Search by:",
             font=("Arial", 12, "bold"),
-            bg="#34495e",
+            bg="#6B1F1F",
             fg="white"
         )
         search_field_label.grid(row=0, column=2, padx=5, pady=5)
@@ -336,7 +336,7 @@ class AdminDashboard:
             control_frame,
             text="User Type:",
             font=("Arial", 12, "bold"),
-            bg="#34495e",
+            bg="#6B1F1F",
             fg="white"
         )
         type_label.grid(row=0, column=4, padx=5, pady=5)
@@ -356,7 +356,7 @@ class AdminDashboard:
             control_frame,
             text="Date From:",
             font=("Arial", 12, "bold"),
-            bg="#34495e",
+            bg="#6B1F1F",
             fg="white"
         )
         date_label.grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
@@ -367,7 +367,7 @@ class AdminDashboard:
                 textvariable=self.date_from_var,
                 font=("Arial", 11),
                 width=15,
-                background='darkblue',
+                background='dark maroon',
                 foreground='white',
                 borderwidth=2,
                 date_pattern='yyyy-mm-dd'
@@ -387,7 +387,7 @@ class AdminDashboard:
             control_frame,
             text="Date To:",
             font=("Arial", 12, "bold"),
-            bg="#34495e",
+            bg="#6B1F1F",
             fg="white"
         )
         date_to_label.grid(row=1, column=2, padx=5, pady=5)
@@ -398,7 +398,7 @@ class AdminDashboard:
                 textvariable=self.date_to_var,
                 font=("Arial", 11),
                 width=15,
-                background='darkblue',
+                background='dark maroon',
                 foreground='white',
                 borderwidth=2,
                 date_pattern='yyyy-mm-dd'
@@ -513,14 +513,14 @@ class AdminDashboard:
         table_frame.grid_columnconfigure(0, weight=1)
         
         # Status bar
-        status_frame = tk.Frame(self.window, bg="#34495e", pady=10)
+        status_frame = tk.Frame(self.window, bg="#6B1F1F", pady=10)
         status_frame.pack(fill=tk.X)
         
         self.status_label = tk.Label(
             status_frame,
             text="Ready",
             font=("Arial", 11),
-            bg="#34495e",
+            bg="#6B1F1F",
             fg="white"
         )
         self.status_label.pack()
@@ -733,7 +733,7 @@ class CreateAdminWindow:
             text="New Username:",
             font=("Arial", 12, "bold"),
             bg="#34495e",
-            fg="white"
+            fg="black"
         )
         username_label.grid(row=0, column=0, sticky=tk.W, pady=8, padx=10)
 

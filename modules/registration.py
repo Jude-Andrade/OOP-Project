@@ -41,7 +41,7 @@ class RegistrationWindow:
         self.window = tk.Toplevel(parent)
         self.window.title("User Registration - EVSU-OC ALIBLOG")
         self.window.geometry("900x700")
-        self.window.configure(bg="#ecf0f1")
+        self.window.configure(bg="#FFFDD0")
         self.window.resizable(False, False)
         
         # Maximize window on popup
@@ -81,30 +81,6 @@ class RegistrationWindow:
         title_frame = tk.Frame(self.window, bg="#6B1F1F", pady=20)
         title_frame.pack(fill=tk.X)
         
-        # # Back button (left side)
-        # back_btn = tk.Button(
-        #     title_frame,
-        #     text="← BACK",
-        #     font=("Arial", 12, "bold"),
-        #     bg="#e74c3c",
-        #     fg="white",
-        #     activebackground="#c0392b",
-        #     activeforeground="white",
-        #     cursor="hand2",
-        #     command=self.go_back
-        # )
-        # back_btn.pack(side=tk.LEFT, padx=20)
-        
-        # # Title (center)
-        # title_label = tk.Label(
-        #     title_frame,
-        #     text="📝 USER REGISTRATION",
-        #     font=("League Spartan", 28, "bold"),
-        #     bg="#6B1F1F",
-        #     fg="white"
-        # )
-        # title_label.pack(expand=True)
-        
         # Title frame with back button
         # Title Frame
         title_frame = tk.Frame(self.window, bg="#6B1F1F", height=170)
@@ -121,9 +97,9 @@ class RegistrationWindow:
             title_frame,
             text="BACK",
             font=("Arial", 14, "bold"),
-            bg="#e74c3c",
+            bg="#E1AD01",
             fg="white",
-            activebackground="#c0392b",
+            activebackground="#E1AD01",
             activeforeground="white",
             cursor="hand2",
             command=self.go_back
@@ -147,15 +123,15 @@ class RegistrationWindow:
 
 
         # Main content frame
-        main_frame = tk.Frame(self.window, bg="#ecf0f1")
+        main_frame = tk.Frame(self.window, bg="#FFFDD0")
         main_frame.pack(expand=True, fill=tk.BOTH, padx=30, pady=120)
         
         # Form frame (left side)
-        form_frame = tk.Frame(main_frame, bg="#ecf0f1")
+        form_frame = tk.Frame(main_frame, bg="#FFFDD0")
         form_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 20))
         
         # Inner centered form container with grid
-        inner_form = tk.Frame(form_frame, bg="#ecf0f1")
+        inner_form = tk.Frame(form_frame, bg="#FFFDD0")
         inner_form.pack(expand=True, anchor=tk.CENTER, pady=10)
         
         # Ensure consistent grid columns so labels and entries align
@@ -167,12 +143,12 @@ class RegistrationWindow:
             inner_form,
             text="User Type:",
             font=("Arial", 14, "bold"),
-            bg="#ecf0f1",
+            bg="#FFFDD0",
             anchor=tk.W
         )
         type_label.grid(row=0, column=0, sticky=tk.W, pady=(20, 15), padx=(10, 10))
         
-        type_frame = tk.Frame(inner_form, bg="#ecf0f1")
+        type_frame = tk.Frame(inner_form, bg="#FFFDD0")
         type_frame.grid(row=0, column=1, sticky=tk.W, pady=(20, 15))
         
         for user_type in ["Student", "Teacher", "Guest"]:
@@ -182,7 +158,7 @@ class RegistrationWindow:
                 variable=self.user_type_var,
                 value=user_type,
                 font=("Arial", 12),
-                bg="#ecf0f1",
+                bg="#FFFDD0",
                 anchor=tk.W,
                 command=self.update_fields_based_on_type
             )
@@ -193,7 +169,7 @@ class RegistrationWindow:
             inner_form,
             text="Full Name:",
             font=("Arial", 14, "bold"),
-            bg="#ecf0f1",
+            bg="#FFFDD0",
             anchor=tk.W
         )
         name_label.grid(row=1, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
@@ -210,7 +186,7 @@ class RegistrationWindow:
             inner_form,
             text="ID Number:",
             font=("Arial", 14, "bold"),
-            bg="#ecf0f1",
+            bg="#FFFDD0",
             anchor=tk.W
         )
         self.id_label.grid(row=2, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
@@ -222,39 +198,14 @@ class RegistrationWindow:
         )
         self.id_entry.grid(row=2, column=1, sticky=tk.W+tk.E, pady=(12, 8))
         
-        # # Department Field
-        # self.dept_label = tk.Label(
-        #     inner_form,
-        #     text="Department:",
-        #     font=("Arial", 14, "bold"),
-        #     bg="#ecf0f1",
-        #     anchor=tk.W
-        # )
-        # self.dept_label.grid(row=3, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
-        
-        # self.dept_entry = tk.Entry(
-        #     inner_form,
-        #     textvariable=self.department_var,
-        #     font=("Arial", 14)
-        # )
-        # self.dept_entry.grid(row=3, column=1, sticky=tk.W+tk.E, pady=(12, 8))
-        
         self.dept_label = tk.Label(
         inner_form,
         text="Department:",
         font=("Arial", 14, "bold"),
-        bg="#ecf0f1",
+        bg="#FFFDD0",
         anchor=tk.W
     )
         self.dept_label.grid(row=3, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
-
-    #     self.dept_entry = ttk.Combobox(
-    #     inner_form,
-    #     textvariable=self.department_var,
-    #     font=("Arial", 14),
-    #     values=self.departments,
-    #     state="readonly"
-    # )
     
         self.dept_entry = ttk.Combobox(
         inner_form,
@@ -278,7 +229,7 @@ class RegistrationWindow:
             inner_form,
             text="Contact Number:",
             font=("Arial", 14, "bold"),
-            bg="#ecf0f1",
+            bg="#FFFDD0",
             anchor=tk.W
         )
         self.contact_label.grid(row=4, column=0, sticky=tk.W, pady=(12, 8), padx=(10, 10))
@@ -291,16 +242,16 @@ class RegistrationWindow:
         self.contact_entry.grid(row=4, column=1, sticky=tk.W+tk.E, pady=(12, 8))
         
         # Buttons
-        button_frame = tk.Frame(inner_form, bg="#ecf0f1")
+        button_frame = tk.Frame(inner_form, bg="#FFFDD0")
         button_frame.grid(row=5, column=0, columnspan=2, pady=30)
         
         register_btn = tk.Button(
             button_frame,
             text="✅ REGISTER & GENERATE QR",
             font=("Arial", 14, "bold"),
-            bg="#27ae60",
+            bg="#6B1F1F",
             fg="white",
-            activebackground="#229954",
+            activebackground="#6B1F1F",
             activeforeground="white",
             width=25,
             height=2,
@@ -313,9 +264,9 @@ class RegistrationWindow:
             button_frame,
             text="🔄 CLEAR",
             font=("Arial", 14, "bold"),
-            bg="#e67e22",
+            bg="#E1AD01",
             fg="white",
-            activebackground="#d35400",
+            activebackground="#E1AD01",
             activeforeground="white",
             width=12,
             height=2,
@@ -354,9 +305,9 @@ class RegistrationWindow:
             qr_frame,
             text="💾 Save QR Code",
             font=("Arial", 12, "bold"),
-            bg="#3498db",
+            bg="#6B1F1F",
             fg="white",
-            activebackground="#2980b9",
+            activebackground="#6B1F1F",
             activeforeground="white",
             width=20,
             cursor="hand2",
